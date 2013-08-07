@@ -1,0 +1,134 @@
+PostgreSQL as a full-text search engine
+=======================================
+Dan Scott (dan@coffeecode.net)
+v1.0, 2013-08-07
+
+Introduction
+------------
+This application shows how to use PostgreSQL as a full-text search engine.
+
+It demonstrates a minimal approach, with the understanding that many
+applications already use PostgreSQL as a primary data store. With the addition
+of an extra column, index, and a trigger to the existing database schema, you
+may be able to use PostgreSQL directly for full-text search and avoid the pain
+of maintaining a separate search engine such as Solr or Sphinx.
+
+Overview
+--------
+This example is divided into three separate scripts:
+
+. `initialize`: creates the database schema and populates it with data
+. `restapp/restserv`: starts a REST server to support REST-based queries
+  of the database, based on the pattern
+  `http://hostname/search/<query>/<page>/<limit>`. The service returns the
+  results (if any) in JSON to the caller.
+. `webapp/webserv`: starts a Web server with a minimal HTTP interface for
+  human-entered queries. The queries are directed to the REST server, and
+  the JSON results are rendered in a crude but easily extensible fashion.
+
+Dependencies
+------------
+
+* A modern version of PostgreSQL; any currently supported version will suffice.
+* Python 3.3 or higher
+* Flask 0.10 or higher
+* py-postgresql
+
+Setup
+-----
+
+. Create a virtual environment using virtualenv, adjusting the location of
+  your Python 3 executable as required:
++
+[source,bash]
+------------------------------------------------------------------------------
+virtualenv --python=/usr/bin/python3 ~/postgres-fts
+~/postgres-fts/bin/pip install flask
+~/postgres-fts/bin/pip install py-postgresql
+------------------------------------------------------------------------------
++
+. Create the PostgreSQL database and a PostgreSQL user. Depending on your
+  environment, something like the following should work:
++
+[source,bash]
+------------------------------------------------------------------------------
+sudo su - postgres
+createdb pgfts
+# Note the following creates a PostgreSQL superuser, which is probably
+# much more permission that you want in production; see the PostgreSQL
+# documentation on granting privileges for real.
+createuser -s -P fts_user
+------------------------------------------------------------------------------
++
+. Create a `~/.pgpass` file that contains the credentials required to access
+  the new database you just created, per
+  http://www.postgresql.org/docs/devel/static/libpq-pgpass.html.
+  This may look something like:
++
+------------------------------------------------------------------------------
+#hostname:port:database:username:password
+localhost:*:pgfts:fts_user:mysecretssss
+------------------------------------------------------------------------------
++
+. Modify the constants in `initialize`, `restapp/config.py`, and
+  `webapp/config.py` to reflect the required PostgreSQL connection information.
+. Create and populate the database schema by running `initialize`.
+. Start up the REST server. The REST server runs on localhost port 8001 by
+  default; change the `PORT` constant to tell it to run elsewhere:
++
+[source,bash]
+------------------------------------------------------------------------------
+~/postgres-fts ./restapp/restserv
+------------------------------------------------------------------------------
++
+. Start up the Web server. The Web server runs on localhost port 5000 by
+  default, and expects to find the REST server running on localhost port 8001.
+  Change PORT and JSON_HOST respectively:
++
+[source,bash]
+------------------------------------------------------------------------------
+~/postgres-fts ./webapp/webserv
+------------------------------------------------------------------------------
++
+. Open http://localhost:5000 in your Web browser (assuming you are using the
+  defaults) and test it out!
+
+Further reading
+---------------
+PostgreSQL is capable of much, much more, including language-specific support,
+custom dictionaries, boolean operators, wildcard searching, and relevancy
+ranking configuration.
+
+* http://postgresql.org/docs/devel/static/textsearch.html[Official PostgreSQL
+  documentation]
+* http://coffeecode.net/archives/260-Seek-and-ye-shall-find-full-text-search-in-PostgreSQL.html[PostgresOpen
+  2012 introduction to full-text search]
+
+Flask is a powerful Web framework that includes simple mapping of routes to
+functions and the jinja2 template system.
+
+* http://flask.pocoo.org/docs[Official Flask documentation]
+* http://jinja.pocoo.org/docs[Official Jinja2 documentation]
+
+TODO
+----
+
+* Demonstrate the use of a parser to support more complex queries (including
+  booleans and wildcard support)
+
+License
+-------
+
+   Copyright 2013 Dan Scott
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.

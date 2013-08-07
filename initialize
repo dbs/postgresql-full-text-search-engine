@@ -1,0 +1,40 @@
+#!/usr/bin/env python3
+"""
+Create and populate a minimal PostgreSQL schema for full text search
+"""
+
+import postgresql
+
+DB_NAME = 'pgfts'
+DB_HOST = 'localhost' # Uses a local socket
+DB_USER = 'fts_user'
+
+DB = postgresql.open(host=DB_HOST, database=DB_NAME, user=DB_USER)
+
+def load_db():
+    """Add sample data to the database"""
+
+    ins = DB.prepare("""
+        INSERT INTO fulltext_search (doc)
+        VALUES ($1)
+    """)
+    ins('Sketching the trees')
+    ins('Found in schema.org')
+    ins('Sketched out in schema.org')
+
+def init_db():
+    """Initialize our database"""
+    DB.execute("DROP TABLE IF EXISTS fulltext_search")
+    DB.execute("""
+        CREATE TABLE fulltext_search (id SERIAL, doc TEXT, tsv TSVECTOR)
+    """)
+    DB.execute("""
+        CREATE TRIGGER tsvupdate BEFORE INSERT OR UPDATE ON fulltext_search
+        FOR EACH ROW EXECUTE PROCEDURE
+        tsvector_update_trigger(tsv, 'pg_catalog.english', doc)
+    """)
+    DB.execute("CREATE INDEX fts_idx ON fulltext_search USING GIN(tsv)")
+
+if __name__ == "__main__":
+    init_db()
+    load_db()

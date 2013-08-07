@@ -1,0 +1,95 @@
+{% extends "index.html" %}
+{% macro makeurl(query, page=0, limit=10) %}
+{%     set url = request.base_url ~ "?query=" ~ terms %}
+{% if page != 0 %}
+{%     set url = url ~ "&amp;page=" ~ page %}
+{% endif %}
+{% if limit and limit != 10 %}
+{%     set url = url ~ "&amp;limit=" ~ limit %}
+{% endif %}
+{{ url }}
+{%- endmacro %}
+{% block title %} - Search Results{% endblock %}
+{% block heading %} - Search Results{% endblock %}
+{% block content %}
+{{ super() }}
+<script>
+function show_more(elem) {
+    var children = elem.parentNode.parentNode.childNodes;
+    /* Display all child snippets */
+    for (var i = 0; i < children.length; i++) {
+        var child = children[i];
+        if (child.tagName == 'DIV') {
+            child.className = 'ressnip';
+        } else if (child.tagName == 'P') {
+            var kids = child.childNodes;
+            for (var j = 0; j < kids.length; j++) {
+                var kid = kids[j];
+                kid.setAttribute('onclick', 'show_less(this);');
+                kid.childNodes[0].nodeValue = ' - ';
+            }
+        }
+    }
+}
+function show_less(elem) {
+    var children = elem.parentNode.parentNode.childNodes;
+    var found = false;
+    for (var i = 0; i < children.length; i++) {
+        var child = children[i];
+        if (child.tagName == 'DIV') {
+            /* Only hide the second and subsequent nodes */
+            if (found) {
+                child.className = 'ressnip hidden';
+            }
+            found = true;
+        } else if (child.tagName == 'P') {
+            child.childNodes[0].setAttribute('onclick', 'show_more(this);');
+            child.childNodes[0].childNodes[0].nodeValue = ' + ';
+        }
+    }
+}
+</script>
+<section id="metadata">
+{% if results.meta.page == 0 and results.meta.total > results.meta.limit %}
+<p>Showing 1 - {{ results.meta.limit }} of about {{ results.meta.total }} results
+{% elif results.meta.page == 0 %}
+<p>Showing 1 - {{ results.meta.total }} of about {{ results.meta.total }} results
+{% elif (results.meta.page + 1) * results.meta.limit > results.meta.total %}
+<p>Showing {{ (results.meta.page * results.meta.limit) + 1 }} - {{
+   results.meta.total }}
+   of about {{ results.meta.total }} results
+{% else %}
+<p>Showing {{ (results.meta.page * results.meta.limit) + 1 }} - {{
+   (results.meta.page + 1) * results.meta.limit }}
+   of about {{ results.meta.total }} results
+{% endif %}
+{% if results.meta.page > 0 %}
+    <a href="{{ makeurl(page=(results.meta.page - 1)) }}">Previous</a>
+{% endif %}
+{% if ((results.meta.page + 1) * results.meta.limit) < results.meta.total %}
+    <a href="{{ makeurl(page=(results.meta.page + 1)) }}">Next</a>
+{% endif %}
+</p>
+</section>
+<div>
+<section id="results">
+{% for result in results['results'] %}
+    <div class="result">
+        <h3 class="restitle">Result # {{ result['id'] }}</h3>
+        <div class="snippets">
+    {% for snippet in result['snippets'] %}
+        {% if loop.first %}
+            <div class="ressnip">... {{ snippet }} ...</div>
+        {% else %}
+            <div class="ressnip hidden">... {{ snippet }} ...</div>
+        {% endif %}
+        {% if loop.last and not loop.first %}
+            <p class="show_hide"><a onclick="show_more(this);"> + </a></p>
+        {% endif %}
+    {% endfor %}
+        </div>
+    </div>
+{% endfor %}
+</section>
+</div>
+{% endblock %}

@@ -1,0 +1,68 @@
+h1 {
+    font-size: 1em;
+}
+form#search-terms {
+    display: inline-block;
+    width: 500px;
+    vertical-align: top;
+}
+
+/*
+form#search-terms label, form#search-terms input {
+    font-size: 1.5em;
+}
+*/
+
+form#search-terms div {
+    display: inline-block;
+}
+
+h3.restitle {
+    margin-bottom: 0px;
+}
+h3.restitle a {
+    text-decoration: none;
+}
+.thumb {
+    display: inline-block;
+    width: 110px;
+    vertical-align: top;
+}
+.result-hdr {
+    display: none;
+    vertical-align: top;
+    width: 100px;
+}
+.snippets {
+    display: inline-block;
+    vertical-align: top;
+}
+.ressnip {
+    max-width: 400px;
+    border-radius: 10px;
+    padding: 1em;
+    border: thin black solid;
+}
+.ressnip {
+    border-width: thin thin thick thin;
+    border-style: solid solid double solid;
+}
+.hidden {
+    display: none;
+}
+p.show_hide {
+    text-align: center;
+    margin-top: 0em;
+    margin-bottom: 0.5em;
+}
+p.show_hide a {
+    color: rgb(0, 0, 238);
+    border-top: none;
+    border-left: thin solid black;
+    border-right: thin solid black;
+    border-bottom: thin solid black;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    padding-left: 1em;
+    padding-right: 1em;
+}
