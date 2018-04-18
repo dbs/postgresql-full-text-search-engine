@@ -37,14 +37,17 @@ Dependencies
 Setup
 -----
 
-. Create a virtual environment using virtualenv, adjusting the location of
+. Create a virtual environment using `virtualenv`, adjusting the location of
   your Python 3 executable as required:
 +
 [source,bash]
 ------------------------------------------------------------------------------
 virtualenv --python=/usr/bin/python3 ~/postgres-fts
-~/postgres-fts/bin/pip install flask
-~/postgres-fts/bin/pip install py-postgresql
+# Set your environment to use this virtual Python installation
+. ~/postgres-fts/bin/activate
+# Install the dependencies
+pip install flask
+pip install py-postgresql
 ------------------------------------------------------------------------------
 +
 . Create the PostgreSQL database and a PostgreSQL user. Depending on your
@@ -58,6 +61,8 @@ createdb pgfts
 # much more permission that you want in production; see the PostgreSQL
 # documentation on granting privileges for real.
 createuser -s -P fts_user
+# Stop being the postgres user
+exit
 ------------------------------------------------------------------------------
 +
 . Create a `~/.pgpass` file that contains the credentials required to access
@@ -70,28 +75,46 @@ createuser -s -P fts_user
 localhost:*:pgfts:fts_user:mysecretssss
 ------------------------------------------------------------------------------
 +
-. Modify the constants in `initialize`, `restapp/config.py`, and
-  `webapp/config.py` to reflect the required PostgreSQL connection information.
-. Create and populate the database schema by running `initialize`.
+. Test your connection to the database using the `psql` command.
+  If the connection fails, you may need to modify `pg_hba.conf` to allow
+  TCP/IP connections to your database with `md5` authentication.
++
+--------------------------------------------------------------------------------
+psql -h localhost -p 5432 -u fts_user -d pgfts
+--------------------------------------------------------------------------------
++
+. Modify the constants in `initialize`, `restapp/restserv`, and
+  `webapp/webserv`, if necessary, to reflect the required PostgreSQL connection
+  information.
+. Create and populate the database schema:
++
+------------------------------------------------------------------------------
+. ~/postgres-fts/bin/activate
+./initialize
+------------------------------------------------------------------------------
++
 . Start up the REST server. The REST server runs on localhost port 8001 by
-  default; change the `PORT` constant to tell it to run elsewhere:
+  default; you can change the `PORT` constant to tell it to run elsewhere:
 +
 [source,bash]
 ------------------------------------------------------------------------------
-~/postgres-fts ./restapp/restserv
+. ~/postgres-fts/bin/activate
+./restapp/restserv
 ------------------------------------------------------------------------------
 +
-. Start up the Web server. The Web server runs on localhost port 5000 by
-  default, and expects to find the REST server running on localhost port 8001.
-  Change PORT and JSON_HOST respectively:
+. The Web server runs on localhost port 5000 by default, and expects to find
+  the REST server running on localhost port 8001.  Change PORT and JSON_HOST
+  respectively if necessary, then start the Web server:
 +
 [source,bash]
 ------------------------------------------------------------------------------
-~/postgres-fts ./webapp/webserv
+. ~/postgres-fts/bin/activate
+./webapp/webserv
 ------------------------------------------------------------------------------
 +
 . Open http://localhost:5000 in your Web browser (assuming you are using the
-  defaults) and test it out!
+  defaults) and test it out. Searching for "trees", "sketching", or
+  "schema.org" should return results!
 
 Further reading
 ---------------
@@ -119,7 +142,7 @@ TODO
 License
 -------
 
-   Copyright 2013 Dan Scott
+   Copyright 2013 Dan Scott, dscott@laurentian.ca
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
