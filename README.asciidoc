@@ -80,7 +80,7 @@ localhost:*:pgfts:fts_user:mysecretssss
   TCP/IP connections to your database with `md5` authentication.
 +
 --------------------------------------------------------------------------------
-psql -h localhost -p 5432 -u fts_user -d pgfts
+psql -h localhost -p 5432 -U fts_user -d pgfts
 --------------------------------------------------------------------------------
 +
 . Modify the constants in `initialize`, `restapp/restserv`, and
