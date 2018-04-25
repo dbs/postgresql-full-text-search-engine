@@ -21,6 +21,7 @@ def load_db():
     ins('Sketching the trees')
     ins('Found in schema.org')
     ins('Sketched out in schema.org')
+    ins('Girl on a train')
 
 def init_db():
     """Initialize our database"""
